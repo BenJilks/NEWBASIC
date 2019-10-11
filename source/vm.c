@@ -170,8 +170,13 @@ void vm_run(int offset)
 			case BC_MOV_AR: NEXT_ADDR; memory[addr] = NEXT_REGISTER; break;
 			case BC_MOV_AC: NEXT_ADDR; memory[addr] = NEXT_CONST; break;
 			case BC_MOV_IR: memory[RA.i] = RB; PC += 2; break;
+			case BC_MOV_IPR: memory[RA.i + code[PC+2]] = RB; PC += 3; break;
+			case BC_MOV_ISR: memory[RA.i - code[PC+2]] = RB; PC += 3; break;
+
 			case BC_MOV_IC: memory[NEXT_REGISTER.i] = NEXT_CONST; break;
-			
+			case BC_MOV_IPC: { int ra = NEXT_BYTE; Register c = NEXT_CONST; memory[R(ra).i + NEXT_BYTE] = c; break; }
+			case BC_MOV_ISC: { int ra = NEXT_BYTE; Register c = NEXT_CONST; memory[R(ra).i - NEXT_BYTE] = c; break; }
+
 			case BC_MOV_RA: ADDR(1); RA = memory[addr]; PC += sizeof(int) + 1; break;
 			case BC_MOV_RI: RA = memory[RB.i]; PC += 2; break;
 			case BC_MOV_RIP: RA = memory[RB.i + code[PC+2]]; PC += 3; break;

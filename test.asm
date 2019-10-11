@@ -1,8 +1,8 @@
 
-fib:
+fac:
 	MOVE R1 [SP-2]
 	COMPARE R1 2
-	GOTO_IF_LESS_THAN else
+	GOTO_IF_LESS_THAN fac_else
 		SUB R1 R1 1
 		PUSH R1
 		CALL fib
@@ -12,12 +12,37 @@ fib:
 		ADD R0 R0 R1
 		RETURN
 
-	else:
+	fac_else:
+		MOVE R0 1
+		RETURN
+
+fib:
+	MOVE R1 [SP-2]
+	COMPARE R1 2
+	GOTO_IF_LESS_THAN fib_else
+		SUB R1 R1 1
+		PUSH R1
+		CALL fib
+		POP R1
+		PUSH R0
+
+		SUB R1 R1 1
+		PUSH R1
+		CALL fib
+		POP R1
+
+		POP R2
+		ADD R0 R0 R2
+		RETURN
+	
+	fib_else:
 		MOVE R0 1
 		RETURN
 
 start:
-PUSH 5
-CALL fib
-INTERUPT #0
+	PUSH 30
+	CALL fib
+	POP R1
+
+	INTERUPT #0
 

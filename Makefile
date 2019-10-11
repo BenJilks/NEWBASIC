@@ -1,4 +1,4 @@
 
 all:
-	gcc source/*.c -O -Iinclude -o BASIC2
+	gcc source/*.c -O3 -Iinclude -o NEWBASIC
 

@@ -225,6 +225,7 @@ static struct Arg read_indirect()
 	struct Arg arg;
 	arg.type = ARG_INDIRECT;
 	arg.reg_id = read_indirect_reg();
+	LOG("[R%i", arg.reg_id);
 	
 	tokenizer_skip_white_space();
 	char operation = tokenizer_next();
@@ -233,8 +234,11 @@ static struct Arg read_indirect()
 		arg.type = (operation == '+' ? ARG_INDIRECT_PLUS : ARG_INDIRECT_SUB);
 		arg.op_const = (char) tokenizer_read_int();
 		tokenizer_next(); // Skip ]
+
+		LOG(" %c %i", operation, arg.op_const);
 	}
 
+	LOG("]");
 	return arg;
 }
 
@@ -399,9 +403,10 @@ struct InstructionGroup
 
 struct InstructionGroup instruction_groups[] = 
 {
-	{ INST_MOV, 10, { INSTRUCTION(MOV_RC), INSTRUCTION(MOV_RR), 
+	{ INST_MOV, 14, { INSTRUCTION(MOV_RC), INSTRUCTION(MOV_RR), 
 		INSTRUCTION(MOV_AR), INSTRUCTION(MOV_AC), 
-		INSTRUCTION(MOV_IR), INSTRUCTION(MOV_IC), 
+		INSTRUCTION(MOV_IR), INSTRUCTION(MOV_IPR), INSTRUCTION(MOV_ISR), 
+		INSTRUCTION(MOV_IC), INSTRUCTION(MOV_IPC), INSTRUCTION(MOV_ISC),
 		INSTRUCTION(MOV_RA), INSTRUCTION(MOV_RI), INSTRUCTION(MOV_RIP), INSTRUCTION(MOV_RIS) } },
 	{ INST_CMP, 2, { INSTRUCTION(CMP_RC), INSTRUCTION(CMP_RR) } },
 	{ INST_ADD, 2, { INSTRUCTION(ADD_RRC), INSTRUCTION(ADD_RRR) } },

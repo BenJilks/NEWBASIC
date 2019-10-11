@@ -137,7 +137,8 @@ void linker_add_code(const char *code, int len)
 		{
 			SKIP(MOV_RR); SKIP(MOV_RC);
 			SKIP(MOV_AR); SKIP(MOV_AC); 
-			SKIP(MOV_IR); SKIP(MOV_IC);
+			SKIP(MOV_IR); SKIP(MOV_IPR); SKIP(MOV_ISR); 
+			SKIP(MOV_IC); SKIP(MOV_IPC); SKIP(MOV_ISC);
 			SKIP(MOV_RA); SKIP(MOV_RI); SKIP(MOV_RIP); SKIP(MOV_RIS);
 			SKIP(CMP_RC); SKIP(CMP_RR);
 			SKIP(ADD_RRC); SKIP(ADD_RRR);
