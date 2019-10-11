@@ -29,10 +29,12 @@
 #define INST_RET	16
 
 // Arg types
-#define ARG_REG		0
-#define ARG_CONST	1
-#define ARG_ADDR	2
-#define ARG_INDIRECT	3
+#define ARG_REG			0
+#define ARG_CONST		1
+#define ARG_ADDR		2
+#define ARG_INDIRECT		3
+#define ARG_INDIRECT_PLUS	4
+#define ARG_INDIRECT_SUB	5
 
 // Named registers
 static char *named_registers[] = 
@@ -62,6 +64,7 @@ struct Arg
 
 	union
 	{
+		int op_const;
 		char const_str[80];
 		char addr_label[80];
 	};
@@ -167,18 +170,9 @@ static struct Arg read_constant(char c)
 static struct Arg read_addr()
 {
 	struct Arg arg;
-	char buffer[80];
-	int buffer_pointer = 0;
-	char c;
 	arg.type = ARG_ADDR;
 	arg.is_addr_label = 0;
-
-	// Read '#' followed by base 10 address
-	while (isdigit(c = tokenizer_next()) && tokenizer_has_next())
-		buffer[buffer_pointer++] = c;
-	tokenizer_push_back(c);
-	buffer[buffer_pointer] = '\0';
-	arg.addr = atoi(buffer);
+	arg.addr = tokenizer_read_int();
 
 	LOG("#%i, ", arg.addr);
 	return arg;
@@ -194,35 +188,54 @@ static struct Arg read_register()
 	return arg;
 }
 
-static struct Arg read_indirect()
+static int read_indirect_reg()
 {
-	struct Arg arg;
 	char c;
 	char buffer[80];
+	int reg = 0;
 
 	tokenizer_skip_white_space();
-	arg.type = ARG_INDIRECT;
 	c = tokenizer_next();
 
 	// If it starts with 'R', it's a register
 	if (c == 'R')
 	{
-		arg.reg_id = tokenizer_next() - '0';
-		return arg;
+		reg = tokenizer_next() - '0';
 	}
-
-	// Otherwise, check named registers
-	buffer[0] = c;
-	tokenizer_read_until(buffer + 1, ']', 0);
-	arg.reg_id = get_named_reg(buffer);
-	tokenizer_next(); // Skip ']'
-
-	// If it's not a named register, then it 
-	// can't be an indirect
-	if (arg.reg_id == 0)
+	else
 	{
-		ERROR("Uknown register '%s'", buffer);
+		// Otherwise, check named registers
+		buffer[0] = c;
+		tokenizer_word(buffer + 1);
+		reg = get_named_reg(buffer);
+
+		// If it's not a named register, then it 
+		// can't be an indirect
+		if (reg == 0)
+		{
+			ERROR("Uknown register '%s'", buffer);
+		}
 	}
+
+	return reg;
+}
+
+static struct Arg read_indirect()
+{
+	struct Arg arg;
+	arg.type = ARG_INDIRECT;
+	arg.reg_id = read_indirect_reg();
+	
+	tokenizer_skip_white_space();
+	char operation = tokenizer_next();
+	if (operation == '+' || operation == '-')
+	{
+		arg.type = (operation == '+' ? ARG_INDIRECT_PLUS : ARG_INDIRECT_SUB);
+		arg.op_const = (char) tokenizer_read_int();
+		tokenizer_next(); // Skip ]
+	}
+
+	return arg;
 }
 
 static struct Arg read_arg(char c)
@@ -319,6 +332,12 @@ static void write_addr(struct Arg arg)
 	}
 }
 
+static void write_indirect_op(struct Arg arg)
+{
+	write_byte(arg.reg_id);
+	write_byte(arg.op_const);
+}
+
 static void write_args()
 {
 	int i;
@@ -331,6 +350,8 @@ static void write_args()
 			case ARG_CONST: write_const(arg); break;
 			case ARG_ADDR: write_addr(arg); break;
 			case ARG_INDIRECT: write_reg(arg); break;
+			case ARG_INDIRECT_PLUS:
+			case ARG_INDIRECT_SUB: write_indirect_op(arg); break;
 		}
 	}
 }
@@ -363,7 +384,7 @@ struct InstructionGroup
 {
 	int type;
 	int instruction_count;
-	struct Instruction instructions[10];
+	struct Instruction instructions[80];
 };
 
 #define PP_NARG(...) PP_NARG_(__VA_ARGS__, PP_RSEQ_N)
@@ -378,10 +399,10 @@ struct InstructionGroup
 
 struct InstructionGroup instruction_groups[] = 
 {
-	{ INST_MOV, 8, { INSTRUCTION(MOV_RC), INSTRUCTION(MOV_RR), 
+	{ INST_MOV, 10, { INSTRUCTION(MOV_RC), INSTRUCTION(MOV_RR), 
 		INSTRUCTION(MOV_AR), INSTRUCTION(MOV_AC), 
 		INSTRUCTION(MOV_IR), INSTRUCTION(MOV_IC), 
-		INSTRUCTION(MOV_RA), INSTRUCTION(MOV_RI) } },
+		INSTRUCTION(MOV_RA), INSTRUCTION(MOV_RI), INSTRUCTION(MOV_RIP), INSTRUCTION(MOV_RIS) } },
 	{ INST_CMP, 2, { INSTRUCTION(CMP_RC), INSTRUCTION(CMP_RR) } },
 	{ INST_ADD, 2, { INSTRUCTION(ADD_RRC), INSTRUCTION(ADD_RRR) } },
 	{ INST_SUB, 2, { INSTRUCTION(SUB_RRC), INSTRUCTION(SUB_RRR) } },

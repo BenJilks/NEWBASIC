@@ -1,6 +1,7 @@
 #include "tokenizer.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define BACK_LOG_SIZE 80
 
@@ -64,14 +65,36 @@ void tokenizer_read_until(char *out, char until, int ignore_space)
 void tokenizer_word(char *out)
 {
 	int index = 0;
-	char c;
-
 	tokenizer_skip_white_space();
-	while (!isspace(c = tokenizer_next()) && !is_eof)
+
+	char c = tokenizer_next();
+	while ((isalpha(c) || isdigit(c) || c == '_' || c == ':') && !is_eof)
+	{
 		out[index++] = c;
+		c = tokenizer_next();
+	}
 	tokenizer_push_back(c);
 	
 	out[index] = '\0';
+}
+
+int tokenizer_read_int()
+{
+	tokenizer_skip_white_space();
+	
+	// Read digits into a buffer
+	char c;
+	char buffer[80];
+	int buffer_pointer = 0;
+	while (isdigit(c = tokenizer_next()) && !is_eof)
+		buffer[buffer_pointer++] = c;
+	
+	// Finish the buffer
+	tokenizer_push_back(c);
+	buffer[buffer_pointer] = '\0';
+
+	// Return the value of the buffer
+	return atoi(buffer);
 }
 
 int tokenizer_has_next()

@@ -29,6 +29,8 @@ static int code_max_len;
 #define CONST		i += copy_len(code, i, skip_const(code, i))
 #define ADDR		i += skip_addr(code, i)
 #define INDIRECT 	REG
+#define INDIRECT_PLUS	i += copy_len(code, i, 2)
+#define INDIRECT_SUB	INDIRECT_PLUS
 
 void linker_init()
 {
@@ -136,7 +138,7 @@ void linker_add_code(const char *code, int len)
 			SKIP(MOV_RR); SKIP(MOV_RC);
 			SKIP(MOV_AR); SKIP(MOV_AC); 
 			SKIP(MOV_IR); SKIP(MOV_IC);
-			SKIP(MOV_RA); SKIP(MOV_RI);
+			SKIP(MOV_RA); SKIP(MOV_RI); SKIP(MOV_RIP); SKIP(MOV_RIS);
 			SKIP(CMP_RC); SKIP(CMP_RR);
 			SKIP(ADD_RRC); SKIP(ADD_RRR);
 			SKIP(SUB_RRC); SKIP(SUB_RRR);

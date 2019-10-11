@@ -5,8 +5,8 @@
 #include <memory.h>
 
 // Debug functions
-#define DEBUG_REGISTERS 1
-#define DEBUG_CODE 	1
+#define DEBUG_REGISTERS 0
+#define DEBUG_CODE 	0
 
 #if DEBUG_CODE
 #define LOG(...) printf(__VA_ARGS__)
@@ -174,6 +174,8 @@ void vm_run(int offset)
 			
 			case BC_MOV_RA: ADDR(1); RA = memory[addr]; PC += sizeof(int) + 1; break;
 			case BC_MOV_RI: RA = memory[RB.i]; PC += 2; break;
+			case BC_MOV_RIP: RA = memory[RB.i + code[PC+2]]; PC += 3; break;
+			case BC_MOV_RIS: RA = memory[RB.i - code[PC+2]]; PC += 3; break;
 
 			case BC_CMP_RC: { Register r = NEXT_REGISTER; op_compare(r, NEXT_CONST); } break;
 			case BC_CMP_RR: op_compare(RA, RB); PC += 2; break;
@@ -204,8 +206,6 @@ void vm_run(int offset)
 		printf("	=> mem 0 = ");
 		print_register(memory[0]);
 #endif
-
-		getc(stdin);
 
 	}
 }

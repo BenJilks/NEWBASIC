@@ -7,6 +7,14 @@
 #define CONST_FLOAT	2
 #define CONST_STRING 	3
 
+// Argument codes:
+// 	R - Register
+// 	A - Address
+// 	C - Constant
+// 	I - Indirect
+// 		P - Plus constant
+// 		S - Sub constant
+
 #define BYTECODE(GEN) \
 	GEN(BC_HULT), \
 	GEN(BC_INT_A), \
@@ -20,6 +28,8 @@
 	 \
 	GEN(BC_MOV_RA), \
 	GEN(BC_MOV_RI), \
+	GEN(BC_MOV_RIP), \
+	GEN(BC_MOV_RIS), \
 	 \
 	GEN(BC_CMP_RR), \
 	GEN(BC_CMP_RC), \
@@ -55,6 +65,8 @@
 
 #define ARGS_MOV_RA(GEN)	GEN(ADDR) GEN(REG)
 #define ARGS_MOV_RI(GEN)	GEN(REG) GEN(INDIRECT)
+#define ARGS_MOV_RIP(GEN)	GEN(REG) GEN(INDIRECT_PLUS)
+#define ARGS_MOV_RIS(GEN)	GEN(REG) GEN(INDIRECT_SUB)
 
 #define ARGS_CMP_RR(GEN)	GEN(REG) GEN(REG)
 #define ARGS_CMP_RC(GEN)	GEN(REG) GEN(CONST)
