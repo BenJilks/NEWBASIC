@@ -1,0 +1,34 @@
+
+R0-9 		; General purpose registers
+PC		; Program counter
+SP		; The current stack pointer
+
+LET x = RX 	; Defines x as register X
+label: 		; Creates a new label
+
+MOVE RA RB 	; Move from register B to register A
+MOVE RA # 	; Move constant into register A
+MOVE @ RA	; Store register A
+MOVE @ #		; Store constent
+MOVE [RA] RB	; Store register B at location in reigster A
+MOVE [RA] #	; Store constant at location in register A
+MOVE RA @	; Load into register A
+MOVE RA [RB]	; Load location at register A into register B
+
+COMPARE RA RB 	; Compare register A to register B
+COMPARE RA #	; Compare reigster A to constant
+ADD RA RB RC	; Add RB and RC, then store in RA
+ADD RA RB #	; Add RB and constant, then store in RA
+
+PUSH RA 	; Push the register to the stack
+PUSH #		; Push a constant to the stack
+POP RA		; Pop the top element of the stack and store it in RA
+CALL @		; Call a subroutine at the address
+RETURN		; Return from a subroutine
+
+GOTO label			; Jumps to the label
+GOTO_IF_EQUAL label		; Jump if equal
+GOTO_IF_NOT_EQUAL label		; Jump if not equal
+GOTO_IF_LESS_THAN label		; Jump if greater than
+GOTO_IF_GREATER_THAN label	; Jump if less than
+INTERUPT @			; Call interupt
